@@ -1,26 +1,30 @@
-from pydantic import BaseModel, Field
+import os
 from pydantic_ai import Agent
+from openai import AsyncAzureOpenAI
 from pydantic_ai.mcp import MCPServerStreamableHTTP
 from pydantic_ai.models.openai import OpenAIChatModel
-from pydantic_ai.providers.ollama import OllamaProvider
-    
-# 1. Define the Ollama model using the OpenAI-compatible interface
-# Note: Ollama's local URL is typically http://localhost:11434/v1
-model = OpenAIChatModel(
-    model_name='qwen3',
-    provider=OllamaProvider(base_url='http://localhost:11434/v1'),
-)
+from pydantic_ai.providers.openai import OpenAIProvider
 
-# 2. Initialize the server and the Agent
+api_token = os.environ.get('PYDANTIC_AI_GATEWAY_API_KEY')
+
+# 1. Initialize the client, server and the Agent
+azure_client = AsyncAzureOpenAI(
+    azure_endpoint="https://genai-training-track-q12026-team-6.openai.azure.com/",
+    api_key=api_token,
+    api_version="2024-10-21",      # Is this the latest version?
+)
 server = MCPServerStreamableHTTP('http://localhost:8000/mcp')
+model = OpenAIChatModel(
+    model_name='gpt-4.1',
+    provider=OpenAIProvider(openai_client=azure_client)
+)
 agent = Agent(
     model=model,
-    # toolsets=[server.toolset()],
     toolsets=[server],
-    system_prompt="You are a helpful assistant that can answer questions and help with tasks. When possiböe, use the provided tools in the agent and the MCP servers to get the best answer."
+    system_prompt="You are a helpful assistant that can answer questions and help with tasks. When possible, use the provided tools in the agent and the MCP servers to get the best answer."
 )
 
-# Define a tool the agent can call
+# 2. Define a tool that the agent can call, in addition to the tools provided by the MCP server
 @agent.tool_plain
 def get_weather(city: str) -> str:
     """Gets the current weather for a city."""
@@ -29,6 +33,6 @@ def get_weather(city: str) -> str:
 # 3. Run the agent
 result = agent.run_sync("Tell me about Tokyo. Also check the current weather there.")
 print(f"Result: {result.output}")
-result = agent.run_sync("How much is 72 plus 54.")
+result = agent.run_sync("How much is 372 plus 454.")
 print(f"--------------------------------")
 print(f"Result: {result.output}")
