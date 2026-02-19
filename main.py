@@ -31,8 +31,15 @@ def get_weather(city: str) -> str:
     return f"The weather in {city} is currently 22°C and sunny."
 
 # 3. Run the agent
-result = agent.run_sync("Tell me about Tokyo. Also check the current weather there.")
+result = agent.run_sync("Tell me about Tokyo.")
 print(f"Result: {result.output}")
-result = agent.run_sync("How much is 372 plus 454.")
+# Pass message_history so the agent knows "there" refers to Tokyo
+result = agent.run_sync(
+    "What's the weather there like today?",
+    message_history=result.new_messages(),
+)
+print(f"--------------------------------")
+print(f"Result: {result.output}")
+result = agent.run_sync("How much is 372 plus 454, please?")
 print(f"--------------------------------")
 print(f"Result: {result.output}")
