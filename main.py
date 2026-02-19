@@ -1,7 +1,7 @@
 import os
 from pydantic_ai import Agent
 from openai import AsyncAzureOpenAI
-from pydantic_ai.mcp import MCPServerStreamableHTTP
+from pydantic_ai.mcp import load_mcp_servers
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 
@@ -13,14 +13,14 @@ azure_client = AsyncAzureOpenAI(
     api_key=api_token,
     api_version="2024-10-21",      # Is this the latest version?
 )
-server = MCPServerStreamableHTTP('http://localhost:8000/mcp')
+servers = load_mcp_servers('mcp_config.json')
 model = OpenAIChatModel(
     model_name='gpt-4.1',
     provider=OpenAIProvider(openai_client=azure_client)
 )
 agent = Agent(
     model=model,
-    toolsets=[server],
+    toolsets=servers,
     system_prompt="You are a helpful assistant that can answer questions and help with tasks. When possible, use the provided tools in the agent and the MCP servers to get the best answer."
 )
 
