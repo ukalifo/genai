@@ -1,6 +1,6 @@
 import os
 from pydantic_ai import Agent
-from openai import AsyncAzureOpenAI
+from openai import AsyncOpenAI
 from pydantic_ai.mcp import load_mcp_servers
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
@@ -8,10 +8,9 @@ from pydantic_ai.providers.openai import OpenAIProvider
 api_token = os.environ.get('PYDANTIC_AI_GATEWAY_API_KEY')
 
 # 1. Initialize the client, server and the Agent
-azure_client = AsyncAzureOpenAI(
-    azure_endpoint="https://genai-training-track-q12026-team-6.openai.azure.com/",
+azure_client = AsyncOpenAI(
+    base_url="https://genai-training-track-q12026-team-6.openai.azure.com/openai/v1",
     api_key=api_token,
-    api_version="2024-10-21",      # Is this the latest version?
 )
 servers = load_mcp_servers('mcp_config.json')
 model = OpenAIChatModel(
